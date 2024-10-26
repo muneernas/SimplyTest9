@@ -1,70 +1,223 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Keyboard,
+  Platform,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Dropdown } from "react-native-element-dropdown";
+import { useNavigation } from "expo-router";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const App = () => {
+  const [selectedBirthPlace, setSelectedBirthPlace] = useState();
+  const [date, setDate] = useState(new Date());
+  const [showPicker, setShowpicker] = useState(false);
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const toggleDatepicker = () => {
+    setShowpicker(!showPicker);
+  };
+  const onChange = ({ type }: any, selectedDate: any) => {
+    if (type == "set") {
+      const currentDate = selectedDate;
+      setDate(currentDate);
+      if (Platform.OS === "android") {
+        setDateOfBirth(currentDate.toDateString());
+      }
+    }
+  };
+  const confirmIOSDate = () => {
+    setDateOfBirth(date.toDateString());
 
-export default function HomeScreen() {
+    toggleDatepicker();
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={Keyboard.dismiss}
+      >
+        <View style={styles.container}>
+          <Text style={styles.header}>ID Input Form</Text>
+          <Text style={styles.SubH}>
+            please input Data from your National ID
+          </Text>
+          <View style={styles.formContainer}>
+            <Text style={styles.label}>Name:</Text>
+            <TextInput style={styles.TextInf}></TextInput>
+            <Text style={styles.label}>National ID Num:</Text>
+            <TextInput
+              keyboardType="numeric"
+              maxLength={10}
+              style={styles.TextInf}
+            ></TextInput>
+            <Text style={styles.label}>Gender:</Text>
+            <Dropdown
+              data={[
+                { value: "Male", label: "Male" },
+                { value: "Female", label: "Female" },
+              ]}
+              labelField={"label"}
+              valueField="value"
+              style={styles.TextInf}
+              value={""}
+              onChange={() => {}}
+            />
+            <Text style={styles.label}>Birth Date:</Text>
+            {showPicker && (
+              <DateTimePicker
+                mode="date"
+                display="spinner"
+                value={date}
+                maximumDate={new Date()}
+                onChange={onChange}
+                style={styles.datepicker}
+              />
+            )}
+            {showPicker && Platform.OS === "ios" && (
+              <View
+                style={{ flexDirection: "row", justifyContent: "space-around" }}
+              >
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    styles.pickerButton,
+                    { backgroundColor: "11182711" },
+                  ]}
+                  onPress={toggleDatepicker}
+                >
+                  <Text style={[styles.buttonText, { color: "#075985" }]}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.pickerButton]}
+                  onPress={confirmIOSDate}
+                >
+                  <Text style={[styles.buttonText]}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {!showPicker && (
+              <Pressable onPress={toggleDatepicker}>
+                <TextInput
+                  style={styles.TextInf}
+                  placeholder="please select a date"
+                  editable={false}
+                  value={dateOfBirth}
+                  onChangeText={setDateOfBirth}
+                  placeholderTextColor={"grey"}
+                  onPressIn={toggleDatepicker}
+                ></TextInput>
+              </Pressable>
+            )}
+            <Text style={styles.label}>Place Of birth:</Text>
+            <Dropdown
+              data={[
+                { value: "Germany", label: "Germany" },
+                { value: "USA", label: "USA" },
+                { value: "Japan", label: "Japan" },
+                { value: "Malta", label: "Malta" },
+                { value: "Wales", label: "Wales" },
+                { value: "Burkina Faso", label: "Burkina Faso" },
+              ]}
+              labelField={"label"}
+              valueField="value"
+              style={styles.TextInf}
+              value={"enter your birth place"}
+              onChange={() => {}}
+            />
+
+            <Text style={styles.label}>Mothers Name:</Text>
+            <TextInput style={styles.TextInf}></TextInput>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+
+    padding: 10,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  header: {
+    fontSize: 36,
+    color: "green",
+    marginBottom: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  text: {
+    fontSize: 24,
+    color: "black",
+  },
+  SubH: {
+    fontSize: 18,
+    color: "grey",
+    marginBottom: 15,
+  },
+  TextInf: {
+    borderWidth: 1,
+    borderColor: "black",
+    height: 35,
+    borderRadius: 8,
+    paddingLeft: 10,
+    fontSize: 16,
+    marginBottom: 15,
+    width: "100%",
+  },
+  label: {
+    fontSize: 18,
+    marginBottom: 5,
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    paddingLeft: 10,
+    width: 200,
+    borderRadius: 5,
+    marginTop: 25,
+  },
+  formContainer: {
+    width: "90%",
+    gap: 12,
+    paddingHorizontal: 20,
+  },
+  datepicker: {
+    height: 120,
+    marginTop: -10,
+  },
+  pickerButton: {
+    paddingHorizontal: 20,
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#fff",
+  },
+  button: {
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    marginTop: 10,
+    marginBottom: 15,
+    backgroundColor: "#075985",
   },
 });
+
+export default App;
