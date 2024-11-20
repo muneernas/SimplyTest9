@@ -1,28 +1,32 @@
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { SafeAreaView } from "react-native";
 import { TweetType } from "@/types/explore";
 import { Entypo } from "@expo/vector-icons/";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
 import Iconbutton from "./IconButton";
 import ImageView from "react-native-image-viewing";
 import { Link } from "expo-router";
+
 type TweetProps = {
   tweet: TweetType;
 };
 
 const Tweet = ({ tweet }: TweetProps) => {
   const [timeSinceTweet, setTimeSinceTweet] = useState("");
+  const [isLiked, setIsLiked] = useState(!!tweet.isLiked); 
+  const [likeCount, setLikeCount] = useState(tweet.numberOfLikes || 0);
   const [isImageViewerVisible, setImageViewerVisible] = useState(false);
   const [isPostViewerVisible, setPostViewerVisible] = useState(false);
+
   const findtime = () => {
     const currentDate = dayjs().add(3, "hour");
     const datestring = tweet?.createdAt;
     const dateobject = dayjs(datestring);
-    const datedif = currentDate.diff(tweet.createdAt, "day");
+    const datedif = currentDate.diff(tweet?.createdAt, "day");
     const formatteddate = dateobject.format("DD-MM-YYYY");
-    const hourdif = currentDate.diff(tweet.createdAt, "hour");
-    const mindif = currentDate.diff(tweet.createdAt, "minute");
+    const hourdif = currentDate.diff(tweet?.createdAt, "hour");
+    const mindif = currentDate.diff(tweet?.createdAt, "minute");
 
     if (datedif > 1) {
       return formatteddate;
@@ -34,7 +38,9 @@ const Tweet = ({ tweet }: TweetProps) => {
         return `${mindif} m`;
       }
     }
+    
   };
+
   useEffect(() => {
     setTimeSinceTweet(findtime());
 
@@ -44,12 +50,47 @@ const Tweet = ({ tweet }: TweetProps) => {
     return () => clearInterval(intervalId);
   }, [tweet.createdAt]);
 
+  const handleLikePress = () => {
+    if (isLiked) {
+      setLikeCount((prev) => prev - 1);
+    } else {
+      setLikeCount((prev) => prev + 1);
+    }
+    setIsLiked((prev) => !prev);
+
+    
+    updateLikeStatus(tweet.id, !isLiked);
+  };
+
+  const updateLikeStatus = async (tweetId: string, like: boolean) => {
+    try {
+      const response = await fetch(
+        `https://4541-92-253-123-200.ngrok-free.app/api/tweets/${tweetId}/like`,
+        {
+          method: like ? "POST" : "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      console.log("Updated like status:", data);
+    } catch (error) {
+      console.error("Error updating like status:", error);
+    }
+    console.log("Tweet ID:", tweet.id, typeof tweet.id);
+console.log("IsLiked:", tweet.isLiked, typeof tweet.isLiked);
+
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Link href={`/tweet/${tweet.id}`} asChild>
+      <Link href={`/tweet/${tweet?.id}`} asChild>
         <Pressable style={styles.container}>
-          <Pressable onPress={() => setImageViewerVisible(true)}>
-            <Image src={tweet.user.image} style={styles.userImage} />
+          <Pressable>
+            <Link href={`/tweet/uspf/${tweet.user?.id}`}>
+              <Image src={tweet.user.image} style={styles.userImage} />
+            </Link>
           </Pressable>
           <View style={styles.mainContainer}>
             <View style={{ display: "flex", flexDirection: "row" }}>
@@ -79,7 +120,12 @@ const Tweet = ({ tweet }: TweetProps) => {
             <View style={styles.footer}>
               <Iconbutton icon="comment" text={tweet.numberOfComments} />
               <Iconbutton icon="retweet" text={tweet.numberOfRetweets} />
-              <Iconbutton icon="heart" text={tweet.numberOfLikes} />
+              <Iconbutton
+                icon="heart"
+                text={likeCount}
+                color={isLiked ? "red" : "gray"}
+                onPress={handleLikePress}
+              />
               <Iconbutton icon="chart" text={tweet.impressions || 0} />
               <Iconbutton icon="share-apple" />
             </View>
@@ -100,8 +146,10 @@ const Tweet = ({ tweet }: TweetProps) => {
         </Pressable>
       </Link>
     </SafeAreaView>
+    
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -142,7 +190,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   username: {
-    fontWeight: 500,
+    fontWeight: "500",
     color: "lightgray",
     marginLeft: 5,
   },
@@ -155,4 +203,5 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
 });
+
 export default Tweet;

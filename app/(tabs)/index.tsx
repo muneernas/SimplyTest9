@@ -14,8 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Pressable } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
-import { useNavigation } from "expo-router";
-
+import { Provider } from "react-redux"; 
+import Stoore from "../store";
 const App = () => {
   const [selectedBirthPlace, setSelectedBirthPlace] = useState();
   const [date, setDate] = useState(new Date());
@@ -40,11 +40,13 @@ const App = () => {
   };
 
   return (
+    <Provider store={Stoore}>
+
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         onScrollBeginDrag={Keyboard.dismiss}
-      >
+        >
         <View style={styles.container}>
           <Text style={styles.header}>ID Input Form</Text>
           <Text style={styles.SubH}>
@@ -58,7 +60,7 @@ const App = () => {
               keyboardType="numeric"
               maxLength={10}
               style={styles.TextInf}
-            ></TextInput>
+              ></TextInput>
             <Text style={styles.label}>Gender:</Text>
             <Dropdown
               data={[
@@ -70,21 +72,21 @@ const App = () => {
               style={styles.TextInf}
               value={""}
               onChange={() => {}}
-            />
+              />
             <Text style={styles.label}>Birth Date:</Text>
             {showPicker && (
               <DateTimePicker
-                mode="date"
-                display="spinner"
-                value={date}
-                maximumDate={new Date()}
-                onChange={onChange}
-                style={styles.datepicker}
+              mode="date"
+              display="spinner"
+              value={date}
+              maximumDate={new Date()}
+              onChange={onChange}
+              style={styles.datepicker}
               />
             )}
             {showPicker && Platform.OS === "ios" && (
               <View
-                style={{ flexDirection: "row", justifyContent: "space-around" }}
+              style={{ flexDirection: "row", justifyContent: "space-around" }}
               >
                 <TouchableOpacity
                   style={[
@@ -93,7 +95,7 @@ const App = () => {
                     { backgroundColor: "11182711" },
                   ]}
                   onPress={toggleDatepicker}
-                >
+                  >
                   <Text style={[styles.buttonText, { color: "#075985" }]}>
                     Cancel
                   </Text>
@@ -101,7 +103,7 @@ const App = () => {
                 <TouchableOpacity
                   style={[styles.button, styles.pickerButton]}
                   onPress={confirmIOSDate}
-                >
+                  >
                   <Text style={[styles.buttonText]}>Confirm</Text>
                 </TouchableOpacity>
               </View>
@@ -117,7 +119,7 @@ const App = () => {
                   onChangeText={setDateOfBirth}
                   placeholderTextColor={"grey"}
                   onPressIn={toggleDatepicker}
-                ></TextInput>
+                  ></TextInput>
               </Pressable>
             )}
             <Text style={styles.label}>Place Of birth:</Text>
@@ -135,7 +137,7 @@ const App = () => {
               style={styles.TextInf}
               value={"enter your birth place"}
               onChange={() => {}}
-            />
+              />
 
             <Text style={styles.label}>Mothers Name:</Text>
             <TextInput style={styles.TextInf}></TextInput>
@@ -143,6 +145,7 @@ const App = () => {
         </View>
       </ScrollView>
     </SafeAreaView>
+              </Provider>
   );
 };
 

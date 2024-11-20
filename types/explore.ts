@@ -1,5 +1,6 @@
 export type TweetType = {
-    id:string;
+    isLiked: number;
+    id:number;
     content: string;
     user: User;
     createdAt: string;
